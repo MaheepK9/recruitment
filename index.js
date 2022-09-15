@@ -1,12 +1,22 @@
-const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static(__dirname + '/public'));
+var express = require("express")
+var bodyParser = require("body-parser")
+var mongoose = require("mongoose")
+
+const app = express()
+
+app.use(bodyParser.json())
+app.use(express.static('public'))
+app.use(bodyParser.urlencoded({
+    extended:true
+}))
 
 mongoose.connect("mongodb+srv://MaheepKumar:wxmc1t5224@cluster0.blfddje.mongodb.net/test", {useNewUrlParser: true}, {useUnifiedTopology: true})
+
+var db = mongoose.connection;
+
+db.on('error',()=>console.log("Error in Connecting to Database"));
+db.once('open',()=>console.log("Connected to Database"))
 
 const notesSchema = {
     person: String,
@@ -19,11 +29,6 @@ const notesSchema = {
 
 }
 const Note =  mongoose.model("Note", notesSchema);
-
-app.get("/", function(req, res){
-   res.sendFile(__dirname + "/index.html");
-})
-
 
 app.post("/", function(req, res){
     let newNote =  new Note({
@@ -39,8 +44,22 @@ app.post("/", function(req, res){
     res.redirect("/");
  })
 
+//  db.collection('users').insertOne(data,(err,collection)=>{
+//     if(err){
+//         throw err;
+//     }
+//     console.log("Record Inserted Successfully");
+// });
+
+app.get("/",(req,res)=>{
+    res.set({
+        "Allow-access-Allow-Origin": '*'
+    })
+    return res.redirect('index.html');
+}).listen(3000);
 
 
-app.listen(3000, function(){
+
+
+
     console.log("Server is running at 3000");
-})
